@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Usuarios</title>
+    <style>
+        /* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Login container styles */
+#loginContainer {
+    max-width: 400px;
+    margin: 50px auto;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+#loginContainer h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #5a5a5a;
+}
+
+/* Input field styles */
+#loginForm input[type="email"],
+#loginForm input[type="password"],
+#usuarioForm input[type="text"],
+#usuarioForm input[type="email"] {
+    width: 100%;
+    padding: 12px; /* Increased padding for better touch target */
+    margin: 10px 0;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensures padding doesn't affect total width */
+}
+
+/* Button styles */
+button {
+    width: 100%;
+    padding: 12px; /* Increased padding for consistency */
+    background-color: #007bff; /* Primary color */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Error message styles */
+#loginError {
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* CRUD container styles */
+#crudContainer {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 20px;
+    background: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+}
+
+#crudContainer h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #5a5a5a;
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: #555;
+}
+
+/* Button styles within table */
+.delete-button {
+    background-color: #d9534f; /* Danger color */
+    padding: 8px 16px; /* Consistent padding */
+    border: none;
+    border-radius: 4px;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c9302c; /* Darker on hover */
+}
+
+/* Responsive styles */
+@media (max-width: 600px) {
+    #loginContainer, #crudContainer {
+        width: 90%;
+    }
+
+    button {
+        font-size: 14px;
+    }
+
+    th, td {
+        font-size: 14px;
+    }
+}
+
+    </style>
+</head>
+<body>
+    <!-- Formulario de Login -->
+    <div id="loginContainer">
+        <h2>Iniciar Sesión</h2>
+        <form id="loginForm">
+            <input type="email" id="loginEmail" placeholder="Correo Electrónico" required>
+            <input type="password" id="loginPassword" placeholder="Contraseña" required>
+            <button type="submit">Login</button>
+            <p id="loginError" style="color: red; display: none;">Credenciales incorrectas</p>
+        </form>
+    </div>
+
+    <div id="crudContainer" style="display: none;">
+        <h1>Lista de Usuarios</h1>
+        <form id="usuarioForm">
+            <input type="hidden" id="usuarioId" name="usuarioId">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="usuarioNombre" name="nombre" required>
+            <label for="email">Email:</label>
+            <input type="email" id="usuarioEmail" name="email" required>
+            <button type="submit" id="submitButton">Agregar Usuario</button>
+        </form>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Email</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="usuarios-tbody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // JavaScript code remains largely unchanged
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            // Datos de login válidos
+            const validEmail = 'maria.lopez@example.com';
+            const validPassword = 'contrasena456';
+
+            // Verifica las credenciales
+            if (email === validEmail && password === validPassword) {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('crudContainer').style.display = 'block';
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        });
+
+        async function cargarUsuarios() {
+            const response = await fetch('/usuarios');
+            const data = await response.json();
+            const tbody = document.getElementById('usuarios-tbody');
+            tbody.innerHTML = '';
+
+            data.forEach(usuario => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${usuario.id}</td>
+                    <td>${usuario.nombre}</td>
+                    <td>${usuario.email}</td>
+                    <td>
+                        <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
+                        <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        window.onload = cargarUsuarios;
+
+        document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('usuarioId').value;
+            const nombre = document.getElementById('usuarioNombre').value;
+            const email = document.getElementById('usuarioEmail').value;
+
+            if (id) {
+                await fetch(`/usuarios/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email })
+                });
+            } else {
+                await fetch('/usuarios', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nombre, email })
+                });
+            }
+            e.target.reset();
+            cargarUsuarios();
+        });
+
+        function editarUsuario(id, nombre, email) {
+            document.getElementById('usuarioId').value = id;
+            document.getElementById('usuarioNombre').value = nombre;
+            document.getElementById('usuarioEmail').value = email;
+            document.getElementById('submitButton').textContent = 'Actualizar Usuario';
+        }
+
+        async function eliminarUsuario(id) {
+            await fetch(`/usuarios/${id}`, { method: 'DELETE' });
+            cargarUsuarios();
+        }
+    </script>
+</body>
+</html>
