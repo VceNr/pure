@@ -30,12 +30,14 @@ sql.connect(config).then(pool => {
     app.get('/usuarios', async (req, res) => {
         try {
             const result = await pool.request().query('SELECT * FROM usuarios');
-            res.json(result.recordset); // Solo envía JSON si los datos son correctos
+            res.json(result.recordset);
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
-            res.status(500).send('Error al obtener usuarios'); // Envía un mensaje de error si algo sale mal
+            // Envía un JSON de error en lugar de un mensaje plano
+            res.status(500).json({ error: 'Error al obtener usuarios' });
         }
     });
+    
 
     app.post('/usuarios', async (req, res) => {
         const { nombre, email } = req.body;

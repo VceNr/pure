@@ -187,25 +187,33 @@ th {
         });
 
         async function cargarUsuarios() {
-            const response = await fetch('/usuarios');
-            const data = await response.json();
-            const tbody = document.getElementById('usuarios-tbody');
-            tbody.innerHTML = '';
-
-            data.forEach(usuario => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${usuario.id}</td>
-                    <td>${usuario.nombre}</td>
-                    <td>${usuario.email}</td>
-                    <td>
-                        <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
-                        <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+    try {
+        const response = await fetch('/usuarios');
+        if (!response.ok) {
+            throw new Error('Error al cargar usuarios');
         }
+        const data = await response.json();
+        const tbody = document.getElementById('usuarios-tbody');
+        tbody.innerHTML = '';
+
+        data.forEach(usuario => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${usuario.id}</td>
+                <td>${usuario.nombre}</td>
+                <td>${usuario.email}</td>
+                <td>
+                    <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
+                    <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(row);
+        });
+    } catch (err) {
+        console.error('Error al cargar usuarios:', err);
+        alert('Hubo un problema al cargar los usuarios');
+    }
+}
 
         window.onload = cargarUsuarios;
 
