@@ -3,197 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Usuarios</title>
+    <title>Gestión de Usuarios</title>
     <style>
-        /* General styles */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f4f4;
-    color: #333;
-}
-
-/* Login container styles */
-#loginContainer {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-}
-
-#loginContainer h2 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #5a5a5a;
-}
-
-/* Input field styles */
-#loginForm input[type="email"],
-#loginForm input[type="password"],
-#usuarioForm input[type="text"],
-#usuarioForm input[type="email"] {
-    width: 100%;
-    padding: 12px; /* Increased padding for better touch target */
-    margin: 10px 0;
-    border: 1px solid #cccccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Ensures padding doesn't affect total width */
-}
-
-/* Button styles */
-button {
-    width: 100%;
-    padding: 12px; /* Increased padding for consistency */
-    background-color: #007bff; /* Primary color */
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-button:hover {
-    background-color: #0056b3; /* Darker shade on hover */
-}
-
-/* Error message styles */
-#loginError {
-    text-align: center;
-    margin-top: 10px;
-}
-
-/* CRUD container styles */
-#crudContainer {
-    max-width: 800px;
-    margin: 20px auto;
-    padding: 20px;
-    background: #ffffff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 5px;
-}
-
-#crudContainer h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #5a5a5a;
-}
-
-/* Table styles */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-th {
-    background-color: #f2f2f2;
-    color: #555;
-}
-
-/* Button styles within table */
-.delete-button {
-    background-color: #d9534f; /* Danger color */
-    padding: 8px 16px; /* Consistent padding */
-    border: none;
-    border-radius: 4px;
-    color: white;
-}
-
-.delete-button:hover {
-    background-color: #c9302c; /* Darker on hover */
-}
-
-/* Responsive styles */
-@media (max-width: 600px) {
-    #loginContainer, #crudContainer {
-        width: 90%;
-    }
-
-    button {
-        font-size: 14px;
-    }
-
-    th, td {
-        font-size: 14px;
-    }
-}
-
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        form {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <!-- Formulario de Login -->
-    <div id="loginContainer">
-        <h2>Iniciar Sesión</h2>
-        <form id="loginForm">
-            <input type="email" id="loginEmail" placeholder="Correo Electrónico" required>
-            <input type="password" id="loginPassword" placeholder="Contraseña" required>
-            <button type="submit">Login</button>
-            <p id="loginError" style="color: red; display: none;">Credenciales incorrectas</p>
-        </form>
-    </div>
 
-    <div id="crudContainer" style="display: none;">
-        <h1>Lista de Usuarios</h1>
-        <form id="usuarioForm">
-            <input type="hidden" id="usuarioId" name="usuarioId">
-            <label for="nombre">Nombre:</label>
-            <input type="text" id="usuarioNombre" name="nombre" required>
-            <label for="email">Email:</label>
-            <input type="email" id="usuarioEmail" name="email" required>
-            <button type="submit" id="submitButton">Agregar Usuario</button>
-        </form>
+    <h1>Gestión de Usuarios</h1>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="usuarios-tbody"></tbody>
-        </table>
-    </div>
+    <form id="user-form">
+        <input type="hidden" id="user-id" />
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" required />
+        <label for="email">Email:</label>
+        <input type="email" id="email" required />
+        <button type="submit">Guardar</button>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="usuarios-tbody">
+            <!-- Aquí se cargarán los usuarios dinámicamente -->
+        </tbody>
+    </table>
 
     <script>
-        // JavaScript code remains largely unchanged
-        document.getElementById('loginForm').addEventListener('submit', function(event) {
-            event.preventDefault();
+        // Cargar usuarios cuando se carga la página
+        document.addEventListener('DOMContentLoaded', cargarUsuarios);
 
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            // Datos de login válidos
-            const validEmail = 'maria.lopez@example.com';
-            const validPassword = 'contrasena456';
-
-            // Verifica las credenciales
-            if (email === validEmail && password === validPassword) {
-                document.getElementById('loginContainer').style.display = 'none';
-                document.getElementById('crudContainer').style.display = 'block';
-            } else {
-                document.getElementById('loginError').style.display = 'block';
-            }
-        });
-
-        function cargarUsuarios() {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://estoekick.azurewebsites.net/usuarios', true);
-    
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/usuarios');
+                if (!response.ok) {
+                    throw new Error('Error al cargar usuarios');
+                }
+                const data = await response.json();
                 const tbody = document.getElementById('usuarios-tbody');
                 tbody.innerHTML = '';
 
@@ -210,58 +83,69 @@ th {
                     `;
                     tbody.appendChild(row);
                 });
-            } else {
-                console.error('Error al cargar usuarios:', xhr.statusText);
+            } catch (err) {
+                console.error('Error al cargar usuarios:', err);
                 alert('Hubo un problema al cargar los usuarios');
             }
         }
-    };
 
-    xhr.onerror = function () {
-        console.error('Error en la solicitud');
-        alert('Hubo un problema al realizar la solicitud');
-    };
-
-    xhr.send();
-}
-
-
-        window.onload = cargarUsuarios;
-
-        document.getElementById('usuarioForm').addEventListener('submit', async (e) => {
+        document.getElementById('user-form').addEventListener('submit', async function (e) {
             e.preventDefault();
-            const id = document.getElementById('usuarioId').value;
-            const nombre = document.getElementById('usuarioNombre').value;
-            const email = document.getElementById('usuarioEmail').value;
 
-            if (id) {
-                await fetch(`/usuarios/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, email })
-                });
-            } else {
-                await fetch('/usuarios', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nombre, email })
-                });
+            const id = document.getElementById('user-id').value;
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+
+            try {
+                if (id) {
+                    // Actualizar usuario
+                    await fetch(`/usuarios/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, email })
+                    });
+                    alert('Usuario actualizado correctamente');
+                } else {
+                    // Agregar usuario
+                    await fetch('/usuarios', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ nombre, email })
+                    });
+                    alert('Usuario agregado correctamente');
+                }
+                document.getElementById('user-form').reset();
+                cargarUsuarios();
+            } catch (err) {
+                console.error('Error al guardar usuario:', err);
+                alert('Hubo un problema al guardar el usuario');
             }
-            e.target.reset();
-            cargarUsuarios();
         });
 
         function editarUsuario(id, nombre, email) {
-            document.getElementById('usuarioId').value = id;
-            document.getElementById('usuarioNombre').value = nombre;
-            document.getElementById('usuarioEmail').value = email;
-            document.getElementById('submitButton').textContent = 'Actualizar Usuario';
+            document.getElementById('user-id').value = id;
+            document.getElementById('nombre').value = nombre;
+            document.getElementById('email').value = email;
         }
 
         async function eliminarUsuario(id) {
-            await fetch(`/usuarios/${id}`, { method: 'DELETE' });
-            cargarUsuarios();
+            if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+                return;
+            }
+            try {
+                await fetch(`/usuarios/${id}`, { method: 'DELETE' });
+                alert('Usuario eliminado correctamente');
+                cargarUsuarios();
+            } catch (err) {
+                console.error('Error al eliminar usuario:', err);
+                alert('Hubo un problema al eliminar el usuario');
+            }
         }
     </script>
+
 </body>
 </html>
