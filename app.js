@@ -33,10 +33,10 @@ sql.connect(config).then(pool => {
             res.json(result.recordset);
         } catch (err) {
             console.error('Error al obtener usuarios:', err);
-            // Envía un JSON de error en lugar de un mensaje plano
-            res.status(500).json({ error: 'Error al obtener usuarios' });
+            res.status(500).send('Error al obtener usuarios');
         }
     });
+    
     
 
     app.post('/usuarios', async (req, res) => {
