@@ -1,4 +1,0 @@
-{
-    "appService.defaultWebAppToDeploy": "/subscriptions/e8b52c9f-582a-4abc-be1b-50b245fe73a2/resourceGroups/tulipanes/providers/Microsoft.Web/sites/triplecom",
-    "appService.deploySubpath": "."
-}
