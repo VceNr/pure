@@ -7,12 +7,12 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-            background-color: #f4f4f4;
+            margin: 20px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 20px;
         }
         table, th, td {
             border: 1px solid black;
@@ -24,51 +24,116 @@
         th {
             background-color: #f2f2f2;
         }
+        form {
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="email"] {
+            padding: 8px;
+            width: calc(100% - 20px);
+            margin-bottom: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
     </style>
 </head>
 <body>
 
     <h1>Lista de Usuarios</h1>
 
+    <!-- Formulario para agregar usuarios -->
+    <form id="usuarioForm">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" name="nombre" required><br><br>
+        <label for="correo">Correo:</label>
+        <input type="email" id="correo" name="correo" required><br><br>
+        <button type="submit">Agregar Usuario</button>
+    </form>
+
+    <!-- Tabla para mostrar la lista de usuarios -->
     <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Correo</th> <!-- Cambié Email a Correo -->
+                <th>Correo</th>
             </tr>
         </thead>
         <tbody id="usuarios-tbody">
-            <!-- Los datos de los usuarios se cargarán aquí -->
+            <!-- Los usuarios se agregarán aquí dinámicamente -->
         </tbody>
     </table>
 
     <script>
-        // Función para cargar usuarios al cargar la página
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const response = await fetch('/usuarios'); // Hacemos la petición al servidor
-                if (!response.ok) {
-                    throw new Error('Error al cargar los usuarios');
-                }
-                const usuarios = await response.json(); // Parseamos la respuesta JSON
+        // Función para cargar y mostrar los usuarios
+        function cargarUsuarios() {
+            fetch('/usuarios')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.getElementById('usuarios-tbody');
+                    
+                    // Limpiar el contenido previo
+                    tbody.innerHTML = '';
 
-                const tbody = document.getElementById('usuarios-tbody'); // Seleccionamos el cuerpo de la tabla
+                    // Iterar sobre los usuarios y agregarlos a la tabla
+                    data.forEach(usuario => {
+                        const row = document.createElement('tr');
 
-                // Iteramos sobre los usuarios y creamos filas para cada uno
-                usuarios.forEach(usuario => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${usuario.id}</td>
-                        <td>${usuario.nombre}</td>
-                        <td>${usuario.correo}</td> <!-- Aquí muestro el correo -->
-                    `;
-                    tbody.appendChild(tr);
+                        // Crear y agregar las celdas
+                        const idCell = document.createElement('td');
+                        idCell.textContent = usuario.id; // Suponiendo que existe una columna id
+                        row.appendChild(idCell);
+
+                        const nombreCell = document.createElement('td');
+                        nombreCell.textContent = usuario.nombre; // Suponiendo que existe una columna nombre
+                        row.appendChild(nombreCell);
+
+                        const correoCell = document.createElement('td');
+                        correoCell.textContent = usuario.correo; // Suponiendo que existe una columna correo
+                        row.appendChild(correoCell);
+
+                        // Agregar la fila al tbody
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error al obtener la lista de usuarios:', error);
                 });
-            } catch (error) {
-                console.error('Error al cargar usuarios:', error);
-                alert('Hubo un problema al cargar los usuarios');
-            }
+        }
+
+        // Llamar a la función para cargar los usuarios al cargar la página
+        window.onload = cargarUsuarios;
+
+        // Manejar el envío del formulario para agregar un nuevo usuario
+        const form = document.getElementById('usuarioForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nombre = document.getElementById('nombre').value;
+            const correo = document.getElementById('correo').value;
+            
+            const response = await fetch('/usuarios', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ nombre, correo })
+            });
+
+            const result = await response.text();
+            alert(result);
+
+            // Recargar la lista de usuarios después de agregar uno nuevo
+            cargarUsuarios();
+
+            // Limpiar el formulario
+            form.reset();
         });
     </script>
 
