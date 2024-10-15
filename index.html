@@ -186,34 +186,45 @@ th {
             }
         });
 
-        async function cargarUsuarios() {
-    try {
-        const response = await fetch('https://estoekick.azurewebsites.net/usuarios');
-        if (!response.ok) {
-            throw new Error('Error al cargar usuarios');
-        }
-        const data = await response.json();
-        const tbody = document.getElementById('usuarios-tbody');
-        tbody.innerHTML = '';
+        function cargarUsuarios() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'https://estoekick.azurewebsites.net/usuarios', true);
+    
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+                const tbody = document.getElementById('usuarios-tbody');
+                tbody.innerHTML = '';
 
-        data.forEach(usuario => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${usuario.id}</td>
-                <td>${usuario.nombre}</td>
-                <td>${usuario.email}</td>
-                <td>
-                    <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
-                    <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
-                </td>
-            `;
-            tbody.appendChild(row);
-        });
-    } catch (err) {
-        console.error('Error al cargar usuarios:', err);
-        alert('Hubo un problema al cargar los usuarios');
-    }
+                data.forEach(usuario => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${usuario.id}</td>
+                        <td>${usuario.nombre}</td>
+                        <td>${usuario.email}</td>
+                        <td>
+                            <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
+                            <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } else {
+                console.error('Error al cargar usuarios:', xhr.statusText);
+                alert('Hubo un problema al cargar los usuarios');
+            }
+        }
+    };
+
+    xhr.onerror = function () {
+        console.error('Error en la solicitud');
+        alert('Hubo un problema al realizar la solicitud');
+    };
+
+    xhr.send();
 }
+
 
         window.onload = cargarUsuarios;
 
