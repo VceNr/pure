@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios</title>
+    <title>Lista de Usuarios</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -24,127 +24,52 @@
         th {
             background-color: #f2f2f2;
         }
-        form {
-            margin-bottom: 20px;
-        }
     </style>
 </head>
 <body>
 
-    <h1>Gestión de Usuarios</h1>
-
-    <form id="user-form">
-        <input type="hidden" id="user-id" />
-        <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" required />
-        <label for="email">Email:</label>
-        <input type="email" id="email" required />
-        <button type="submit">Guardar</button>
-    </form>
+    <h1>Lista de Usuarios</h1>
 
     <table>
         <thead>
             <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Email</th>
-                <th>Acciones</th>
+                <th>Correo</th> <!-- Cambié Email a Correo -->
             </tr>
         </thead>
         <tbody id="usuarios-tbody">
-            <!-- Aquí se cargarán los usuarios dinámicamente -->
+            <!-- Los datos de los usuarios se cargarán aquí -->
         </tbody>
     </table>
 
     <script>
-        // Cargar usuarios cuando se carga la página
-        document.addEventListener('DOMContentLoaded', cargarUsuarios);
-
-        async function cargarUsuarios() {
+        // Función para cargar usuarios al cargar la página
+        document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const response = await fetch('/usuarios');
+                const response = await fetch('/usuarios'); // Hacemos la petición al servidor
                 if (!response.ok) {
-                    throw new Error('Error al cargar usuarios');
+                    throw new Error('Error al cargar los usuarios');
                 }
-                const data = await response.json();
-                const tbody = document.getElementById('usuarios-tbody');
-                tbody.innerHTML = '';
+                const usuarios = await response.json(); // Parseamos la respuesta JSON
 
-                data.forEach(usuario => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
+                const tbody = document.getElementById('usuarios-tbody'); // Seleccionamos el cuerpo de la tabla
+
+                // Iteramos sobre los usuarios y creamos filas para cada uno
+                usuarios.forEach(usuario => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
                         <td>${usuario.id}</td>
                         <td>${usuario.nombre}</td>
-                        <td>${usuario.email}</td>
-                        <td>
-                            <button onclick="editarUsuario(${usuario.id}, '${usuario.nombre}', '${usuario.email}')">Editar</button>
-                            <button class="delete-button" onclick="eliminarUsuario(${usuario.id})">Eliminar</button>
-                        </td>
+                        <td>${usuario.correo}</td> <!-- Aquí muestro el correo -->
                     `;
-                    tbody.appendChild(row);
+                    tbody.appendChild(tr);
                 });
-            } catch (err) {
-                console.error('Error al cargar usuarios:', err);
+            } catch (error) {
+                console.error('Error al cargar usuarios:', error);
                 alert('Hubo un problema al cargar los usuarios');
             }
-        }
-
-        document.getElementById('user-form').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const id = document.getElementById('user-id').value;
-            const nombre = document.getElementById('nombre').value;
-            const email = document.getElementById('email').value;
-
-            try {
-                if (id) {
-                    // Actualizar usuario
-                    await fetch(`/usuarios/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ nombre, email })
-                    });
-                    alert('Usuario actualizado correctamente');
-                } else {
-                    // Agregar usuario
-                    await fetch('/usuarios', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ nombre, email })
-                    });
-                    alert('Usuario agregado correctamente');
-                }
-                document.getElementById('user-form').reset();
-                cargarUsuarios();
-            } catch (err) {
-                console.error('Error al guardar usuario:', err);
-                alert('Hubo un problema al guardar el usuario');
-            }
         });
-
-        function editarUsuario(id, nombre, email) {
-            document.getElementById('user-id').value = id;
-            document.getElementById('nombre').value = nombre;
-            document.getElementById('email').value = email;
-        }
-
-        async function eliminarUsuario(id) {
-            if (!confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
-                return;
-            }
-            try {
-                await fetch(`/usuarios/${id}`, { method: 'DELETE' });
-                alert('Usuario eliminado correctamente');
-                cargarUsuarios();
-            } catch (err) {
-                console.error('Error al eliminar usuario:', err);
-                alert('Hubo un problema al eliminar el usuario');
-            }
-        }
     </script>
 
 </body>
